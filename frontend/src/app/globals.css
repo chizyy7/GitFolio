@@ -1,0 +1,413 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   Theme tokens
+   --------------------------------------------------------------------------
+   GitFolio is dark-mode-first. Every colour is an RGB triplet consumed by
+   Tailwind via `rgb(var(--token) / <alpha-value>)`, which keeps opacity
+   utilities working (`bg-canvas/60`). Adding `class="light"` to <html> flips
+   the whole app to the light palette with no component changes.
+   ========================================================================== */
+:root {
+  color-scheme: dark;
+
+  --canvas: 13 17 23; /* #0d1117 */
+  --canvas-subtle: 22 27 34; /* #161b22 */
+  --canvas-inset: 1 4 9; /* #010409 */
+  --canvas-overlay: 22 27 34;
+
+  --border-default: 48 54 61; /* #30363d */
+  --border-muted: 33 38 45; /* #21262d */
+
+  --fg-default: 230 237 243; /* #e6edf3 */
+  --fg-muted: 139 148 158; /* #8b949e */
+  --fg-subtle: 110 118 129;
+  --fg-on-emphasis: 255 255 255;
+
+  --accent: 88 166 255; /* #58a6ff */
+  --accent-emphasis: 31 111 235; /* #1f6feb */
+  --accent-muted: 56 139 253;
+
+  --success: 63 185 80; /* #3fb950 */
+  --success-emphasis: 35 134 54;
+
+  --danger: 248 81 73; /* #f85149 */
+  --danger-emphasis: 218 54 51;
+
+  --attention: 210 153 34; /* #d29922 */
+  --attention-emphasis: 158 106 3;
+
+  --done: 163 113 247; /* #a371f7 */
+  --done-emphasis: 130 80 223;
+
+  /* Contribution heatmap ramp */
+  --heat-0: 22 27 34;
+  --heat-1: 14 68 41;
+  --heat-2: 0 109 50;
+  --heat-3: 38 166 65;
+  --heat-4: 57 211 83;
+}
+
+html.light {
+  color-scheme: light;
+
+  --canvas: 255 255 255;
+  --canvas-subtle: 246 248 250;
+  --canvas-inset: 246 248 250;
+  --canvas-overlay: 255 255 255;
+
+  --border-default: 208 215 222;
+  --border-muted: 234 238 242;
+
+  --fg-default: 31 35 40;
+  --fg-muted: 89 99 110;
+  --fg-subtle: 110 118 129;
+  --fg-on-emphasis: 255 255 255;
+
+  --accent: 9 105 218;
+  --accent-emphasis: 9 105 218;
+  --accent-muted: 84 174 255;
+
+  --success: 26 127 55;
+  --success-emphasis: 26 127 55;
+
+  --danger: 207 34 46;
+  --danger-emphasis: 207 34 46;
+
+  --attention: 154 103 0;
+  --attention-emphasis: 154 103 0;
+
+  --done: 130 80 223;
+  --done-emphasis: 130 80 223;
+
+  --heat-0: 235 237 240;
+  --heat-1: 155 233 168;
+  --heat-2: 64 196 99;
+  --heat-3: 48 161 78;
+  --heat-4: 33 110 57;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+@layer base {
+  * {
+    border-color: rgb(var(--border-default));
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-fg antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background: rgb(var(--accent) / 0.35);
+  }
+
+  /* Scrollbars — thin and unobtrusive, matching the theme. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--border-default)) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--border-default));
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--fg-subtle));
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: 2px;
+  }
+
+  code,
+  pre,
+  kbd {
+    @apply font-mono;
+    font-variant-ligatures: none;
+  }
+}
+
+/* ==========================================================================
+   Reusable component classes
+   ========================================================================== */
+@layer components {
+  .card {
+    @apply rounded-lg border border-border bg-canvas-subtle shadow-card;
+  }
+
+  .card-header {
+    @apply flex items-center justify-between gap-3 border-b border-border px-4 py-3;
+  }
+
+  .input {
+    @apply w-full rounded-md border border-border bg-canvas-inset px-3 py-2 text-sm text-fg
+           placeholder:text-fg-subtle focus:border-accent focus:outline-none
+           focus:ring-1 focus:ring-accent/40 disabled:opacity-60;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-border
+           bg-canvas-subtle px-3 py-2 text-sm font-medium text-fg transition
+           hover:border-fg-subtle hover:bg-canvas-overlay
+           disabled:cursor-not-allowed disabled:opacity-55;
+  }
+
+  .btn-primary {
+    @apply border-transparent bg-accent-emphasis text-fg-onEmphasis hover:bg-accent hover:border-transparent;
+  }
+
+  .btn-danger {
+    @apply border-danger/40 bg-danger/10 text-danger hover:bg-danger/20 hover:border-danger/60;
+  }
+
+  .btn-ghost {
+    @apply border-transparent bg-transparent hover:bg-canvas-subtle;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-2xs font-medium;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-2.5 py-0.5
+           text-2xs font-medium text-accent;
+  }
+
+  .link {
+    @apply text-accent hover:underline;
+  }
+
+  .divider {
+    @apply border-t border-border;
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden rounded bg-canvas-subtle;
+  }
+
+  .skeleton::after {
+    content: "";
+    @apply absolute inset-0 -translate-x-full animate-shimmer;
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--border-default) / 0.55),
+      transparent
+    );
+  }
+}
+
+/* ==========================================================================
+   Contribution heatmap (react-calendar-heatmap)
+   ========================================================================== */
+.react-calendar-heatmap text {
+  fill: rgb(var(--fg-muted));
+  font-size: 9px;
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+.react-calendar-heatmap rect {
+  stroke: rgb(var(--canvas));
+  stroke-width: 1px;
+  rx: 2px;
+  ry: 2px;
+  transition: opacity 120ms ease;
+}
+
+.react-calendar-heatmap rect:hover {
+  stroke: rgb(var(--fg-muted));
+  stroke-width: 1.5px;
+}
+
+.react-calendar-heatmap rect.level-0 {
+  fill: rgb(var(--heat-0));
+}
+.react-calendar-heatmap rect.level-1 {
+  fill: rgb(var(--heat-1));
+}
+.react-calendar-heatmap rect.level-2 {
+  fill: rgb(var(--heat-2));
+}
+.react-calendar-heatmap rect.level-3 {
+  fill: rgb(var(--heat-3));
+}
+.react-calendar-heatmap rect.level-4 {
+  fill: rgb(var(--heat-4));
+}
+
+/* ==========================================================================
+   Shiki code blocks
+   ========================================================================== */
+.shiki {
+  background: transparent !important;
+  font-size: 0.8125rem;
+  line-height: 1.65;
+}
+
+.shiki-pre {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  background: transparent !important;
+}
+
+.shiki code {
+  counter-reset: line;
+}
+
+.shiki .line {
+  display: inline-block;
+  width: 100%;
+  padding: 0 0.25rem;
+}
+
+.shiki .line:hover {
+  background: rgb(var(--fg-default) / 0.035);
+}
+
+.shiki .highlighted-line {
+  background: rgb(var(--attention) / 0.14);
+  box-shadow: inset 2px 0 0 rgb(var(--attention));
+}
+
+/* Diff viewer */
+.diff-line {
+  @apply font-mono text-xs leading-6;
+  white-space: pre;
+  display: block;
+  padding: 0 0.75rem;
+}
+
+.diff-line-add {
+  background: rgb(var(--success) / 0.12);
+  color: rgb(var(--success));
+}
+
+.diff-line-del {
+  background: rgb(var(--danger) / 0.12);
+  color: rgb(var(--danger));
+}
+
+.diff-line-hunk {
+  background: rgb(var(--accent) / 0.1);
+  color: rgb(var(--accent));
+}
+
+.diff-line-meta {
+  color: rgb(var(--fg-muted));
+}
+
+/* ==========================================================================
+   Chat prose (Llama 3.2 answers)
+   ========================================================================== */
+.chat-prose {
+  @apply text-sm leading-relaxed;
+}
+
+.chat-prose p {
+  @apply mb-3 last:mb-0;
+}
+
+.chat-prose ul,
+.chat-prose ol {
+  @apply mb-3 ml-5 space-y-1;
+}
+
+.chat-prose ul {
+  @apply list-disc;
+}
+
+.chat-prose ol {
+  @apply list-decimal;
+}
+
+.chat-prose code {
+  @apply rounded bg-canvas-inset px-1 py-0.5 text-xs;
+}
+
+.chat-prose pre {
+  @apply mb-3 overflow-x-auto rounded-md border border-border bg-canvas-inset p-3;
+}
+
+.chat-prose strong {
+  @apply font-semibold text-fg;
+}
+
+.chat-prose a {
+  @apply text-accent underline decoration-dotted;
+}
+
+.chat-prose h1,
+.chat-prose h2,
+.chat-prose h3,
+.chat-prose h4,
+.chat-prose h5 {
+  @apply mb-2 mt-4 font-semibold text-fg;
+}
+
+/* Citation pills rendered inside answers */
+.citation-pill {
+  @apply mx-0.5 inline-flex items-center gap-1 rounded border border-accent/30 bg-accent/10
+         px-1.5 py-0.5 align-baseline font-mono text-2xs text-accent
+         transition hover:bg-accent/20;
+}
+
+/* ==========================================================================
+   Animations
+   ========================================================================== */
+@keyframes typing {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  animation: typing 1.2s infinite;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+/* Utility for the "grid" backdrop on the landing page. */
+.grid-backdrop {
+  background-image:
+    linear-gradient(rgb(var(--border-muted) / 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--border-muted) / 0.5) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 70% 55% at 50% 0%, #000 40%, transparent 100%);
+}

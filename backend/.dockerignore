@@ -1,0 +1,30 @@
+# Python build / cache artefacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments (never ship these into the image)
+.venv/
+venv/
+env/
+
+# Local environment / secrets
+.env
+.env.*
+
+# Local data
+data/
+*.sqlite3
+*.db
+chroma/
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

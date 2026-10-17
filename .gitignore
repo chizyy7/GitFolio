@@ -1,0 +1,40 @@
+# --- Python ----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Node / Next.js --------------------------------------------------------
+node_modules/
+.next/
+out/
+build/
+dist/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# --- Environment -----------------------------------------------------------
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# --- Data ------------------------------------------------------------------
+data/
+*.sqlite3
+*.db
+chroma/
+
+# --- Editors / OS ----------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/settings.json

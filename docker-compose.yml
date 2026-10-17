@@ -1,0 +1,120 @@
+# ---------------------------------------------------------------------------
+# GitFolio — full local stack.
+#
+#   cp .env.example .env        # set JWT_SECRET at minimum
+#   docker compose up --build
+#
+# Services:
+#   postgres    relational source of truth
+#   chromadb    vector store for RAG
+#   ollama      local Llama 3.2 + nomic-embed-text
+#   backend     FastAPI API          -> http://localhost:8000
+#   frontend    Next.js app          -> http://localhost:3000
+#   ollama-init one-shot model puller (runs once, then exits)
+# ---------------------------------------------------------------------------
+name: gitfolio
+
+services:
+  # ------------------------------------------------------------- database
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gitfolio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gitfolio}
+      POSTGRES_DB: ${POSTGRES_DB:-gitfolio}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gitfolio} -d ${POSTGRES_DB:-gitfolio}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ---------------------------------------------------------- vector store
+  chromadb:
+    image: ghcr.io/chroma-core/chroma:0.5.23
+    restart: unless-stopped
+    environment:
+      IS_PERSISTENT: "TRUE"
+      ANONYMIZED_TELEMETRY: "FALSE"
+    ports:
+      # Exposed on 8001 to avoid clashing with the backend on 8000.
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+
+  # ------------------------------------------------------------ local LLM
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  # One-shot helper: pull the two models the app expects, then exit.
+  ollama-init:
+    image: ollama/ollama:latest
+    depends_on:
+      - ollama
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint:
+      - /bin/sh
+      - -c
+      - "sleep 5 && ollama pull llama3.2 && ollama pull nomic-embed-text"
+    restart: "no"
+
+  # ---------------------------------------------------------------- API
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # These override anything in .env so the stack works with zero edits.
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-gitfolio}:${POSTGRES_PASSWORD:-gitfolio}@postgres:5432/${POSTGRES_DB:-gitfolio}
+      OLLAMA_HOST: http://ollama:11434
+      CHROMA_HOST: chromadb
+      CHROMA_PORT: 8000
+      STORAGE_PATH: /data/repos
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+    ports:
+      - "8000:8000"
+    volumes:
+      - repo_storage:/data/repos
+    depends_on:
+      postgres:
+        condition: service_healthy
+      chromadb:
+        condition: service_started
+      ollama:
+        condition: service_started
+
+  # ------------------------------------------------------------- web app
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Baked into the client bundle at build time.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api}
+        NEXT_PUBLIC_SITE_NAME: ${NEXT_PUBLIC_SITE_NAME:-GitFolio}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  chroma_data:
+  ollama_data:
+  repo_storage:

@@ -1,0 +1,30 @@
+# Dependencies (installed inside the image)
+node_modules/
+.npm/
+.pnpm-store/
+
+# Build output (rebuilt inside the image)
+.next/
+out/
+build/
+dist/
+.turbo/
+*.tsbuildinfo
+
+# Local environment / secrets
+.env
+.env.local
+.env.*.local
+!.env.local.example
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Docs / VCS noise
+*.md
+!README.md
+Dockerfile
+.dockerignore
